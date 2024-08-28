@@ -15,7 +15,7 @@ use GuzzleHttp\Exception\ClientException;
 
 class ShopifyUserController extends Controller
 {
-	// Extra fields to process from form CAMBIO
+	// Extra fields to process from form
 	const METAFIELDS = ["birthday_date", "postal_code", "phone_number", "gender", "country"];
 
 	public function createUser(Request $request) {
