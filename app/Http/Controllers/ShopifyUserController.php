@@ -177,7 +177,7 @@ class ShopifyUserController extends Controller
 							$apiKey = env('KLY_EU_PRIVATE_API_KEY');
 							$publicApiKey = env('KLY_EU_PUBLIC_API_KEY');
 							break;
-						case "ROW":
+						case "WW":
 							$apiKey = env('KLY_WW_PRIVATE_API_KEY');
 							$publicApiKey = env('KLY_WW_PUBLIC_API_KEY');
 							break;
@@ -300,7 +300,7 @@ class ShopifyUserController extends Controller
 							$apiKey = env('KLY_EU_PRIVATE_API_KEY');
 							$publicApiKey = env('KLY_EU_PUBLIC_API_KEY');
 							break;
-						case "ROW":
+						case "WW":
 							$apiKey = env('KLY_WW_PRIVATE_API_KEY');
 							$publicApiKey = env('KLY_WW_PUBLIC_API_KEY');
 							break;
@@ -574,7 +574,7 @@ class ShopifyUserController extends Controller
 				$apiKey = env('KLY_EU_PRIVATE_API_KEY');
 				$publicApiKey = env('KLY_EU_PUBLIC_API_KEY');
 				break;
-			case "ROW":
+			case "WW":
 				$apiKey = env('KLY_WW_PRIVATE_API_KEY');
 				$publicApiKey = env('KLY_WW_PUBLIC_API_KEY');
 				break;
@@ -654,7 +654,7 @@ class ShopifyUserController extends Controller
 			case "EU":
 				$apiKey = env('KLY_EU_PRIVATE_API_KEY');
 				break;
-			case "ROW":
+			case "WW":
 				$apiKey = env('KLY_WW_PRIVATE_API_KEY');
 				break;
 			case "DE":
