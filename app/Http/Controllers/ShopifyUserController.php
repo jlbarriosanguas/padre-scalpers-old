@@ -19,7 +19,7 @@ class ShopifyUserController extends Controller
 	const METAFIELDS = ["birthday_date", "postal_code", "phone_number", "gender", "country"];
 
 	public function createUser(Request $request) {
-		//Log::debug(env('SFY_ENABLED_STORES'));
+		// Log::debug(env('SFY_ENABLED_STORES'));
 		// Log::debug($request);
 		// Definitions
         $customer = $request->all()['customer'];
@@ -57,9 +57,9 @@ class ShopifyUserController extends Controller
         ];
         // Klaviyo properties
         $properties = [
-            '$email' => $customer['email'],
-            '$first_name' => $customer['first_name'],
-            '$last_name' => $customer['last_name']
+            'email' => $customer['email'],
+            'first_name' => $customer['first_name'],
+            'last_name' => $customer['last_name']
         ];
 
 		if (isset($request->all()['fullForm'])) {
@@ -89,19 +89,22 @@ class ShopifyUserController extends Controller
 								$properties["postal_code"] = $value;
 								break;
 							case "phone_number":
-								$properties['$phone_number'] = $value;
+								$properties['phone_number'] = $value;
 								break;
 							case "gender":
 								$properties["gender"] = $value;
 								break;
 							case "country":
-								$properties['$country'] = $value;
+								$properties['country'] = $value;
 								break;
 						}
 					}
 				}
 			}
+
+
 		}
+
         if (isset($customer['accepts_marketing'])) {
             $user["customer"]["accepts_marketing"] = $customer['accepts_marketing'];
             $properties["Accepts Marketing"] = $customer['accepts_marketing'];
@@ -141,8 +144,7 @@ class ShopifyUserController extends Controller
             array_push($user["customer"]["tags"], "Corporate");
             array_push($user["customer"]["tags"], "Company: " . $request->all()['company']['name']);
         }
-		Log::debug('origin');
-		Log::debug($origincode);
+
 		// Disabled user check and invite
 		$sfy_customer = Utilidades::shopifyRESTAPI('GET', '/admin/api/2023-01/customers/search.json?query=email:'.$customer['email'], Utilidades::shopifyStoreSel($origincode), "");
 
@@ -156,75 +158,81 @@ class ShopifyUserController extends Controller
 
 					switch ($request->customer['country']){
 						case "ES":
-							$apiKey = "pk_9b103bc31d0db9c7e7a814b0dbea15be91";
-							$publicApiKey = "HQyYvT";
+							$apiKey = env('KLY_ES_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_ES_PUBLIC_API_KEY');
 							break;
 						case "PT":
-							$apiKey = "pk_df40c22d39c04a4e6199320d2735ab6648";
-							$publicApiKey = "Jvf2bD";
+							$apiKey = env('KLY_PT_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_PT_PUBLIC_API_KEY');
 							break;
 						case "FR":
-							$apiKey = "pk_c53485e8ad154adf97344e2b73795be264";
-							$publicApiKey = "HLFyPs";
+							$apiKey = env('KLY_FR_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_FR_PUBLIC_API_KEY');
 							break;
 						case "UK":
-							$apiKey = "pk_69487ccd5975cdaa5e87185e6956b95ae2";
-							$publicApiKey = "HAvPXb";
+							$apiKey = env('KLY_UK_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_UK_PUBLIC_API_KEY');
 							break;
 						case "EU":
-							$apiKey = "pk_97900eb289afda3e6dd7ff4350cb3f4d3f";
-							$publicApiKey = "JMQ2Rf";
+							$apiKey = env('KLY_EU_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_EU_PUBLIC_API_KEY');
 							break;
 						case "ROW":
-							$apiKey = "pk_1c343a74590141796a4bad943877494ea5";
-							$publicApiKey = "H6X3Zi";
+							$apiKey = env('KLY_WW_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_WW_PUBLIC_API_KEY');
 							break;
 						case "DE":
-							$apiKey = "pk_22adcf74f0316aac3c48b01d8893af4395";
-							$publicApiKey = "U8Kp6p";
+							$apiKey = env('KLY_DE_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_DE_PUBLIC_API_KEY');
 							break;
 						case "CL":
-							$apiKey = "pk_ea39f8c5b0339f196a6774af0454acbf2b";
-							$publicApiKey = "RiNWfn";
+							$apiKey = env('KLY_CL_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_CL_PUBLIC_API_KEY');
 							break;
 						case "MX":
-							$apiKey = "pk_2d9d312a9be926867daa8eed5b3faea421";
-							$publicApiKey = "PxvL8Y";
+							$apiKey = env('KLY_MX_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_MX_PUBLIC_API_KEY');
 							break;
 						case "CO":
-							$apiKey = "pk_b27b9e1b7718a063e615db59b302d6ea4f";
-							$publicApiKey = "Uq2Sa5";
+							$apiKey = env('KLY_CO_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_CO_PUBLIC_API_KEY');
 							break;
 						case "BE":
-							$apiKey = "pk_58490409c04517b58524f489e5f7be07b0";
-							$publicApiKey = "XLTU96";
+							$apiKey = env('KLY_BE_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_BE_PUBLIC_API_KEY');
 							break;
 					}
 					
 					$response = $client->request('POST', 'https://a.klaviyo.com/client/profiles/?company_id=' . $publicApiKey, [
-					  'body' => '{"data":{"type":"profile","attributes":{"email":"' . $request['customer']['email'] . '","first_name":"' . $request['customer']['first_name'] . '","last_name":"' . $request['customer']['last_name'] . '","properties":{}}}}',
+					  'body' => '{"data":{"type":"profile","attributes":{"email":"' . $request['customer']['email'] . '","first_name":"' . $request['customer']['first_name'] . '","last_name":"' . $request['customer']['last_name'] . '"}}}',
 					  'headers' => [
 						'accept' => 'application/json',
 						'content-type' => 'application/json',
 						'revision' => '2023-12-15',
 					  ],
 					]);
-					
+
 					/*$response = $client->request('GET', 'https://a.klaviyo.com/api/v2/people/search?email=' . $request['customer']['email'] . '&api_key=' . $apiKey, [
 					  'headers' => [
 						'accept' => 'application/json',
 					  ],
 					]);*/
-					$client = new Client();
-					$headers = [
-					  'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
-					  'revision' => '2024-05-15'
-					];
-					$request = new Request('GET', 'https://a.klaviyo.com/api/profiles?filter=equals(email,"' . $request['customer']['email'] . '")', $headers);
-					$response = $client->sendAsync($request)->wait();
+					$client = new \GuzzleHttp\Client(['verify' => false]);
+					
+					Log::debug("api key->");
+					Log::debug($apiKey);
+					
+
+					$response = $client->request('GET', 'https://a.klaviyo.com/api/profiles/?filter=equals(email,"' . $request['customer']['email'] . '")', [
+					  'headers' => [
+						'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
+						'accept' => 'application/json',
+						'revision' => '2024-06-15',
+					  ],
+					]);
 					
 					$idKlaviyoUser = json_decode($response->getBody(), true);
-					$idKlaviyoUser = $idKlaviyoUser['id'];
+					$idKlaviyoUser = $idKlaviyoUser['data'][0]['id'];
 					
 					/*$userKlaviyo = $client->request('GET', 'https://a.klaviyo.com/api/profiles/' . $idKlaviyoUser, [
 					  'headers' => [
@@ -246,6 +254,7 @@ class ShopifyUserController extends Controller
 				}
 				array_push($user["customer"]["tags"], "tier: Bronze");
 			}
+
             if ($sfy_customer["customers"][0]["state"] == "disabled") {
                 $invite = Utilidades::shopifyRESTAPI('POST', '/admin/api/2023-01/customers/' . $sfy_customer["customers"][0]["id"] . '/send_invite.json', Utilidades::shopifyStoreSel($origincode), '{ "customer_invite": {} }');
                 if (isset($invite["customer_invite"])) {
@@ -254,89 +263,101 @@ class ShopifyUserController extends Controller
                     $cust_array["id"] = $sfy_customer["customers"][0]["id"];
                     $request->merge(["customer" => $cust_array]);
                     $this->updateUser($request);
-					Utilidades::klaviyoIdentifyApi(Utilidades::shopifyStoreSel($origincode), json_encode($properties, true));
+					// Utilidades::klaviyoIdentifyApi(Utilidades::shopifyStoreSel($origincode), json_encode($properties, true));
 				}
 				return $invite;
             }
         } else {
+
             // Create user
             // TAGS para customers en formulario personalizado
             if ($request->all()['fullForm'] == "true") {
+
 				// Log::debug(json_decode($request['customer']['id_klv_list']));
 				// array_push($user["customer"]["tags"], "POLARSOUND24");
 				if(isset($request['customer']['id_klv_list'])){
-				
+
 					$client = new \GuzzleHttp\Client(['verify' => false]);
 
 					switch ($request->customer['country']){
 						case "ES":
-							$apiKey = "pk_9b103bc31d0db9c7e7a814b0dbea15be91";
-							$publicApiKey = "HQyYvT";
+							$apiKey = env('KLY_ES_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_ES_PUBLIC_API_KEY');
 							break;
 						case "PT":
-							$apiKey = "pk_df40c22d39c04a4e6199320d2735ab6648";
-							$publicApiKey = "Jvf2bD";
+							$apiKey = env('KLY_PT_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_PT_PUBLIC_API_KEY');
 							break;
 						case "FR":
-							$apiKey = "pk_c53485e8ad154adf97344e2b73795be264";
-							$publicApiKey = "HLFyPs";
+							$apiKey = env('KLY_FR_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_FR_PUBLIC_API_KEY');
 							break;
 						case "UK":
-							$apiKey = "pk_69487ccd5975cdaa5e87185e6956b95ae2";
-							$publicApiKey = "HAvPXb";
+							$apiKey = env('KLY_UK_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_UK_PUBLIC_API_KEY');
 							break;
 						case "EU":
-							$apiKey = "pk_97900eb289afda3e6dd7ff4350cb3f4d3f";
-							$publicApiKey = "JMQ2Rf";
+							$apiKey = env('KLY_EU_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_EU_PUBLIC_API_KEY');
 							break;
 						case "ROW":
-							$apiKey = "pk_1c343a74590141796a4bad943877494ea5";
-							$publicApiKey = "H6X3Zi";
+							$apiKey = env('KLY_WW_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_WW_PUBLIC_API_KEY');
 							break;
 						case "DE":
-							$apiKey = "pk_22adcf74f0316aac3c48b01d8893af4395";
-							$publicApiKey = "U8Kp6p";
+							$apiKey = env('KLY_DE_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_DE_PUBLIC_API_KEY');
 							break;
 						case "CL":
-							$apiKey = "pk_ea39f8c5b0339f196a6774af0454acbf2b";
-							$publicApiKey = "RiNWfn";
+							$apiKey = env('KLY_CL_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_CL_PUBLIC_API_KEY');
 							break;
 						case "MX":
-							$apiKey = "pk_2d9d312a9be926867daa8eed5b3faea421";
-							$publicApiKey = "PxvL8Y";
+							$apiKey = env('KLY_MX_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_MX_PUBLIC_API_KEY');
 							break;
 						case "CO":
-							$apiKey = "pk_b27b9e1b7718a063e615db59b302d6ea4f";
-							$publicApiKey = "Uq2Sa5";
+							$apiKey = env('KLY_CO_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_CO_PUBLIC_API_KEY');
 							break;
 						case "BE":
-							$apiKey = "pk_58490409c04517b58524f489e5f7be07b0";
+							$apiKey = env('KLY_BE_PRIVATE_API_KEY');
+							$publicApiKey = env('KLY_BE_PUBLIC_API_KEY');
 							break;
 					}
 					
 					$response = $client->request('POST', 'https://a.klaviyo.com/client/profiles/?company_id=' . $publicApiKey, [
-					  'body' => '{"data":{"type":"profile","attributes":{"email":"' . $request['customer']['email'] . '","first_name":"' . $request['customer']['first_name'] . '","last_name":"' . $request['customer']['last_name'] . '","properties":{}}}}',
+					  'body' => '{"data":{"type":"profile","attributes":{"email":"' . $request['customer']['email'] . '","first_name":"' . $request['customer']['first_name'] . '","last_name":"' . $request['customer']['last_name'] . '","properties":' . json_encode($properties, true) . '}}}',
 					  'headers' => [
 						'accept' => 'application/json',
 						'content-type' => 'application/json',
 						'revision' => '2023-12-15',
 					  ],
 					]);
-					
+
 					/*$response = $client->request('GET', 'https://a.klaviyo.com/api/v2/people/search?email=' . $request['customer']['email'] . '&api_key=' . $apiKey, [
 					  'headers' => [
 						'accept' => 'application/json',
 					  ],
 					]);*/
-					$client = new Client();
+					$client = new \GuzzleHttp\Client(['verify' => false]);
+
+					$response = $client->request('GET', 'https://a.klaviyo.com/api/profiles/?filter=equals(email,"' . $request['customer']['email'] . '")', [
+					  'headers' => [
+						'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
+						'accept' => 'application/json',
+						'revision' => '2024-06-15',
+					  ],
+					]);
+					/*$client = new Client();
 					$headers = [
 					  'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
 					  'revision' => '2024-05-15'
 					];
 					$request = new Request('GET', 'https://a.klaviyo.com/api/profiles?filter=equals(email,"' . $request['customer']['email'] . '")', $headers);
-					$response = $client->sendAsync($request)->wait();
+					$response = $client->sendAsync($request)->wait();*/
 					$idKlaviyoUser = json_decode($response->getBody(), true);
-					$idKlaviyoUser = $idKlaviyoUser['id'];
+					$idKlaviyoUser = $idKlaviyoUser['data'][0]['id'];
 					
 					/*$userKlaviyo = $client->request('GET', 'https://a.klaviyo.com/api/profiles/' . $idKlaviyoUser, [
 					  'headers' => [
@@ -361,28 +382,33 @@ class ShopifyUserController extends Controller
             $sfy_customer = Utilidades::shopifyRESTAPI('POST', '/admin/api/2023-01/customers.json', Utilidades::shopifyStoreSel($origincode), json_encode($user, true));
             if (isset($sfy_customer["customer"])) {
                 // Notify to Klaviyo
-                Utilidades::klaviyoIdentifyApi(Utilidades::shopifyStoreSel($origincode), json_encode($properties, true));
+                // Utilidades::klaviyoIdentifyApi(Utilidades::shopifyStoreSel($origincode), json_encode($properties, true));
             }
         }
-		if(isset($request['customer']['accepts_marketing']) && $request['customer']['accepts_marketing'] && $customer['country'] == "ES") {
+
+		// if(isset($request['customer']['accepts_marketing']) && $request['customer']['accepts_marketing'] && $customer['country'] == "ES") {
 			// Utilidades::klaviyoAddProfileToList($customer['email']);
-		}
+		// }
 		// Utilidades::klaviyoAddProfileToList();
-        
-		if (isset($sfy_customer["customer"])) {
-			$n =0;
-			do {
-				$lty_customer = Utilidades::getLoyaltyCustomer($customer["email"], env('LTY_API_KEY'), env('LTY_API_PWD'));
-				$n++;
-			} while(!isset($lty_customer["customers"][0]));
-			Utilidades::updateLoyaltyUserBirthday($customer["email"], $lty_customer["customers"][0]["merchant_id"], $customer["birthday_date"], env('LTY_API_KEY'), env('LTY_API_PWD'));
-        }
+
+		// Loyalty solo está ES
+        if($customer["country"] == "ES"){
+			if (isset($sfy_customer["customer"])) {
+				$n = 0;
+				do {
+					$lty_customer = Utilidades::getLoyaltyCustomer($customer["email"], env('LTY_API_KEY'), env('LTY_API_PWD'));
+					// Log::debug($lty_customer);
+					$n++;
+				} while(!isset($lty_customer["customers"][0]));
+				Utilidades::updateLoyaltyUserBirthday($customer["email"], $lty_customer["customers"][0]["merchant_id"], $customer["birthday_date"], env('LTY_API_KEY'), env('LTY_API_PWD'));
+			}
+		}
+
 		return $sfy_customer;
 	}
 
 	// Update fields of a existent user
     public function updateUser(Request $request) {
-		// Log::debug(json_encode($request));
         // Definitions
         $customer = $request->all()['customer'];
         $originurl = str_replace('https://', '', $request->headers->get('origin'));
@@ -397,7 +423,7 @@ class ShopifyUserController extends Controller
         } else {
             $origincode = $check;
         }
-		
+
         // Phone number space trimming
         if (isset($customer['phone_number'])) {
             $customer['phone_number'] = str_replace(' ', '', $customer['phone_number']);
@@ -471,7 +497,7 @@ class ShopifyUserController extends Controller
         }
 
         if (isset($customer['phone_number'])) {
-            $properties['$phone_number'] = $customer['phone_number'];
+            $properties['phone_number'] = $customer['phone_number'];
         }
 
         if (isset($customer['gender'])) {
@@ -523,15 +549,75 @@ class ShopifyUserController extends Controller
         // Update User
         $update = Utilidades::shopifyRESTAPI('PUT', 'customers/' . $customer['id'] . '.json', Utilidades::shopifyStoreSel($origincode), json_encode($user, true));
 
-        Utilidades::klaviyoIdentifyApi(Utilidades::shopifyStoreSel($origincode), json_encode($properties, true));
-		// Log::debug($sfy_customer["customer"]);
-        
-        do {
-            $lty_customer = Utilidades::getLoyaltyCustomer($sfy_customer_full['customer']['email'], env('LTY_API_KEY'), env('LTY_API_PWD'));
-        } while(!isset($lty_customer["customers"][0]));
+        // Utilidades::klaviyoIdentifyApi(Utilidades::shopifyStoreSel($origincode), json_encode($properties, true));
 		
-        Utilidades::updateLoyaltyUserBirthday($sfy_customer_full['customer']['email'], $lty_customer["customers"][0]["merchant_id"], $customer["birthday_date"], env('LTY_API_KEY'), env('LTY_API_PWD'));
+		$client = new \GuzzleHttp\Client(['verify' => false]);
 
+		switch ($origincode){
+			case "ES":
+				$apiKey = env('KLY_ES_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_ES_PUBLIC_API_KEY');
+				break;
+			case "PT":
+				$apiKey = env('KLY_PT_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_PT_PUBLIC_API_KEY');
+				break;
+			case "FR":
+				$apiKey = env('KLY_FR_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_FR_PUBLIC_API_KEY');
+				break;
+			case "UK":
+				$apiKey = env('KLY_UK_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_UK_PUBLIC_API_KEY');
+				break;
+			case "EU":
+				$apiKey = env('KLY_EU_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_EU_PUBLIC_API_KEY');
+				break;
+			case "ROW":
+				$apiKey = env('KLY_WW_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_WW_PUBLIC_API_KEY');
+				break;
+			case "DE":
+				$apiKey = env('KLY_DE_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_DE_PUBLIC_API_KEY');
+				break;
+			case "CL":
+				$apiKey = env('KLY_CL_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_CL_PUBLIC_API_KEY');
+				break;
+			case "MX":
+				$apiKey = env('KLY_MX_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_MX_PUBLIC_API_KEY');
+				break;
+			case "CO":
+				$apiKey = env('KLY_CO_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_CO_PUBLIC_API_KEY');
+				break;
+			case "BE":
+				$apiKey = env('KLY_BE_PRIVATE_API_KEY');
+				$publicApiKey = env('KLY_BE_PUBLIC_API_KEY');
+				break;
+		}
+		
+		$body = '{"data":{"type":"profile","attributes":{"email":"' . $sfy_customer_full['customer']['email'] . '","phone_number":"' . $customer['phone_number'] . '","first_name":"' . $customer['first_name'] . '","last_name":"' . $customer['last_name'] . '","properties":' . json_encode($properties, true) . '}}}';
+
+		$response = $client->request('POST', 'https://a.klaviyo.com/client/profiles/?company_id=' . $publicApiKey, [
+		  'body' => $body,
+		  'headers' => [
+			'accept' => 'application/json',
+			'content-type' => 'application/json',
+			'revision' => '2023-12-15',
+		  ],
+		]);
+        
+		if ($origincode == 'ES') {
+			do {
+				$lty_customer = Utilidades::getLoyaltyCustomer($sfy_customer_full['customer']['email'], env('LTY_API_KEY'), env('LTY_API_PWD'));
+			} while(!isset($lty_customer["customers"][0]));
+			Utilidades::updateLoyaltyUserBirthday($sfy_customer_full['customer']['email'], $lty_customer["customers"][0]["merchant_id"], $customer["birthday_date"], env('LTY_API_KEY'), env('LTY_API_PWD'));
+		}
+		
         return $update;
     }
 
@@ -546,62 +632,63 @@ class ShopifyUserController extends Controller
         return $origincode;
     }
 	
+	/*
+	* Se ejecuta cuando accedemos a la sección de newsletter y lo que hace es decirnos consultando en klaviyo si el usuario existe y dar la información.
+	*/
 	public function getKlaviyoCustomer(Request $request) {
 		$client = new \GuzzleHttp\Client(['verify' => false]);
-		
+
 		switch ($request->store){
 			case "ES":
-				$apiKey = "pk_9b103bc31d0db9c7e7a814b0dbea15be91";
+				$apiKey = env('KLY_ES_PRIVATE_API_KEY');
 				break;
 			case "PT":
-				$apiKey = "pk_df40c22d39c04a4e6199320d2735ab6648";
+				$apiKey = env('KLY_PT_PRIVATE_API_KEY');
 				break;
 			case "FR":
-				$apiKey = "pk_c53485e8ad154adf97344e2b73795be264";
+				$apiKey = env('KLY_FR_PRIVATE_API_KEY');
 				break;
 			case "UK":
-				$apiKey = "pk_69487ccd5975cdaa5e87185e6956b95ae2";
+				$apiKey = env('KLY_UK_PRIVATE_API_KEY');
 				break;
 			case "EU":
-				$apiKey = "pk_97900eb289afda3e6dd7ff4350cb3f4d3f";
+				$apiKey = env('KLY_EU_PRIVATE_API_KEY');
 				break;
 			case "ROW":
-				$apiKey = "pk_1c343a74590141796a4bad943877494ea5";
+				$apiKey = env('KLY_WW_PRIVATE_API_KEY');
 				break;
 			case "DE":
-				$apiKey = "pk_22adcf74f0316aac3c48b01d8893af4395";
+				$apiKey = env('KLY_DE_PRIVATE_API_KEY');
 				break;
 			case "CL":
-				$apiKey = "pk_ea39f8c5b0339f196a6774af0454acbf2b";
+				$apiKey = env('KLY_CL_PRIVATE_API_KEY');
 				break;
 			case "MX":
-				$apiKey = "pk_2d9d312a9be926867daa8eed5b3faea421";
+				$apiKey = env('KLY_MX_PRIVATE_API_KEY');
 				break;
 			case "CO":
-				$apiKey = "pk_b27b9e1b7718a063e615db59b302d6ea4f";
+				$apiKey = env('KLY_CO_PRIVATE_API_KEY');
 				break;
 			case "BE":
-				$apiKey = "pk_58490409c04517b58524f489e5f7be07b0";
+				$apiKey = env('KLY_BE_PRIVATE_API_KEY');
 				break;
 		}
 
-		$response = $client->request('GET', 'https://a.klaviyo.com/api/v2/people/search?email=' . $request->mail . '&api_key=' . $apiKey, [
-		  'headers' => [
-			'accept' => 'application/json',
-		  ],
+		$response = $client->request('GET', 'https://a.klaviyo.com/api/profiles/?filter=equals(email,"' . $request->mail . '")' , [
+			'headers' => [
+			  'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
+			  'accept' => 'application/json',
+			  'revision' => '2024-05-15',
+			],
 		]);
 		
-		/*$client = new Client();
-		$headers = [
-		  'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
-		  'revision' => '2024-05-15',
-		];
-		
-		$request = new Request('GET', 'https://a.klaviyo.com/api/profiles?filter=equals(email,"' . $request->mail . '")', $headers);
-		$response = $client->sendAsync($request)->wait();*/
-		
 		$idKlaviyoUser = json_decode($response->getBody(), true);
-		$idKlaviyoUser = $idKlaviyoUser['id'];
+		
+		if (isset($idKlaviyoUser['data'][0])) {
+			$idKlaviyoUser = $idKlaviyoUser['data'][0]['id'];
+		} else {
+			$idKlaviyoUser = $idKlaviyoUser['data']['id'];
+		}
 		
 		$userKlaviyo = $client->request('GET', 'https://a.klaviyo.com/api/profiles/' . $idKlaviyoUser, [
 		  'headers' => [
@@ -621,8 +708,8 @@ class ShopifyUserController extends Controller
 	public function addProfileToList(Request $request, String $email, String $first_name, String $last_name, String $date_submit, String $birthday_shopify, String $consentDisney, String $consent) {
 		$client = new \GuzzleHttp\Client(['verify' => false]);
 		
-		$apiKey = "pk_9b103bc31d0db9c7e7a814b0dbea15be91";
-		$publicApiKey = "HQyYvT";
+		$apiKey = env('KLY_ES_PRIVATE_API_KEY');
+		$publicApiKey = env('KLY_ES_PUBLIC_API_KEY');
 		
 		$response = $client->request('POST', 'https://a.klaviyo.com/client/profiles/?company_id=' . $publicApiKey, [
 		  'body' => '{"data":{"type":"profile","attributes":{"email":"' . $email . '","first_name":"' . $first_name . '","last_name":"' . $last_name . '","properties":{"date_submit_disney":"' . $date_submit . '", "birthday_shopify":"' . $birthday_shopify . '", "consent_disney":"' . $consentDisney . '"}}}}',
@@ -632,13 +719,7 @@ class ShopifyUserController extends Controller
 			'revision' => '2023-12-15',
 		  ],
 		]);
-		
-		/*$response = $client->request('GET', 'https://a.klaviyo.com/api/v2/people/search?email=' . $request->mail . '&api_key=' . $apiKey, [
-		  'headers' => [
-			'accept' => 'application/json',
-		  ],
-		]);*/
-		
+				
 		$client = new Client();
 		$headers = [
 		  'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
@@ -661,7 +742,7 @@ class ShopifyUserController extends Controller
 		$response = $client->request('POST', 'https://a.klaviyo.com/api/lists/UU9GmC/relationships/profiles/', [
 		  'body' => '{"data":[{"type":"profile","id":"' . $idKlaviyoUser . '"}]}',
 		  'headers' => [
-			'Authorization' => 'Klaviyo-API-Key pk_cb8f633c8c0b1a02c7b3351905a31facba',
+			'Authorization' => 'Klaviyo-API-Key ' . env('KLY_ES_PRIVATE_API_KEY'),
 			'accept' => 'application/json',
 			'content-type' => 'application/json',
 			'revision' => '2023-12-15',
@@ -672,23 +753,18 @@ class ShopifyUserController extends Controller
 			$response = $client->request('POST', 'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/', [
 			  'body' => '{"data":{"type":"profile-subscription-bulk-create-job","attributes":{"custom_source":"Marketing Event","profiles":{"data":[{"type":"profile","id":"' . $idKlaviyoUser . '","attributes":{"email":"' . $email . '","subscriptions":{"email":{"marketing":{"consent":"SUBSCRIBED","consented_at":"' . date("Y-m-d") . 'T' . date("H:i:s") . '"}}}}}]}},"relationships":{"list":{"data":{"type":"list","id":"UU9GmC"}}}}}',
 			  'headers' => [
-				'Authorization' => 'Klaviyo-API-Key pk_cb8f633c8c0b1a02c7b3351905a31facba',
+				'Authorization' => 'Klaviyo-API-Key ' . env('KLY_ES_PRIVATE_API_KEY'),
 				'accept' => 'application/json',
 				'content-type' => 'application/json',
 				'revision' => '2024-02-15',
 			  ],
 			]);
 		}
-		
-		// $userKlaviyo = json_decode($userKlaviyo->getBody(), true);
-		
-		// $consent = $userKlaviyo['data']['attributes']['subscriptions']['email']['marketing']['consent'];
-		
+				
 		return "ok";
 	}
 	
 	public function getStock() {
-		
 		return "OK";
 	}
 

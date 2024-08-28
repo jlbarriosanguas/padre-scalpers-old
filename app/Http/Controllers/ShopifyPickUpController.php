@@ -253,33 +253,4 @@ class ShopifyPickUpController extends Controller
         }
         return $province_code;
     }
-
-    // public function storeLocation(Request $request)
-    // {
-    //     $validatedData = $request->validate([
-    //         'title' => 'required',
-    //         'summernote' => 'required',
-    //         'department' => 'required',
-    //         'city' => 'required'
-    //     ]);
-
-    //     $offer = new JobOffer([
-    //         'offer_status' => 'active',
-    //         'title' => $request->get('title'),
-    //         'body' => $request->get('summernote'),
-    //         'department' => $request->get('department'),
-    //         'city' => $request->get('city'),
-    //         'observations' => $request->get('observations'),
-    //         //'image' => $request->get('image')
-    //     ]);
-    //     $store_offer = $offer->save();
-
-    //     if ($store_offer) {
-    //         $response = 'Job Offer created';
-    //     } else {
-    //         $response = 'Error while storing values';
-    //     }
-
-    //     return $response;
-    // }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\VerifyShopifyHmac;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -163,6 +164,8 @@ Route::group(['prefix' => 'lty-ce'], function() {
 	Route::post('reward/synergym', 'LoyaltyCustomEventsController@rewardsPadreSynergym')->name('ltyce_rewards_padre_synergym');
 	Route::post('reward/bobbibrown', 'LoyaltyCustomEventsController@rewardsPadreBobbibrown')->name('ltyce_rewards_padre_bobbibrown');
 	Route::post('reward/ps', 'LoyaltyCustomEventsController@rewardsPadrePolardSound')->name('ltyce_ps');
+	Route::post('reward/nextory', 'LoyaltyCustomEventsController@rewardsPadreNextStory')->name('ltyce_ps');
+	Route::post('reward/barajacartas', 'LoyaltyCustomEventsController@rewardsPadreBarajaCartas')->name('ltyce_ps');
 	Route::get('get-pic-subscription/{mail}', 'LoyaltyCustomEventsController@getPicSubscription')->name('get_pic_subscription');
 	Route::post('reward/traveler', 'LoyaltyCustomEventsController@rewardsPadreTraveler')->name('ltyce_rewards_padre');
 	Route::get('app-download', function() { exit(json_encode(array("errors" => "Unauthorized access"))); });

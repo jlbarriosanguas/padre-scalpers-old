@@ -18,6 +18,9 @@ class ShopifyAppOrderController extends Controller
 
             $order = $request->json()->all();
 
+            Log::debug("arrayOrderTrack");
+            Log::debug($order);
+            
             if (isset($order["app_id"]) && isset($order["email"])) {
                 if ($order["app_id"] == 1520611) {// TapCart
 
@@ -32,6 +35,8 @@ class ShopifyAppOrderController extends Controller
                     ];
 
                     $event_name = 'Pedido APP';
+                    Log::debug('TrackApiReceiver');
+                    Log::debug($cust_properties);
                     $kly_request = Utilidades::klaviyoTrackAPI(Utilidades::shopifyStoreSel('ES'), $event_name, json_encode($cust_properties), json_encode($properties));
                     $insert_origin = DB::table('shopify_cart')->where('id', 1)->update(['request_data' => $order["app_id"]]);
                 }

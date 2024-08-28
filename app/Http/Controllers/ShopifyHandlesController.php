@@ -21,7 +21,7 @@ class ShopifyHandlesController extends Controller
 		$store = Utilidades::shopifyStoreSel($storeCode);
 		$now = Carbon::now()->timestamp;
 		$fiveminutes = 300; // 5 minutes timestamp
-		// Log::debug(json_encode($vendors));
+		Log::debug(json_encode($vendors));
 		
 		$query = '{
             collections (query:"tag:INVITED BRANDS", sortKey:TITLE) {
@@ -65,11 +65,16 @@ class ShopifyHandlesController extends Controller
 			$jsonl = fgets($file);
 			if ($jsonl != '') {
 				$line = json_decode($jsonl, true);
+				// Log::debug("line->" . $line['handle']);
 				
 				if (strpos($line["id"], "/Collection/") !== false) {
-					$vendorCollection = str_replace("invited-brands-", "", $line['handle']);
-					// Log::debug($vendorCollection);
-					$vendorCollection = preg_replace('/\-[0-9]{4}/', "", $vendorCollection);
+					// Log::debug("handle->" . $line['handle']);
+					if ($line['handle'] == "invited-brands-5351") {
+						$vendorCollection = "invited-brands";
+					} else {
+						$vendorCollection = str_replace("invited-brands-", "", $line['handle']);
+						$vendorCollection = preg_replace('/\-[0-9]{4}/', "", $vendorCollection);
+					}
 					// Log::debug("*****************************************************************");
 					// Log::debug($vendorCollection);
 					
@@ -89,6 +94,9 @@ class ShopifyHandlesController extends Controller
 							}
 							if ($originalVendor == "BECK SONDERGAARD") {
 								$originalVendor = "BECKSONDERGAARD";
+							}
+							if ($line['title'] == "Invited Brands - Collection") {
+								$originalVendor = "INVITED BRANDS";
 							}
 							array_push($collectionsHandles, [
 								"handle" => $line['handle'],

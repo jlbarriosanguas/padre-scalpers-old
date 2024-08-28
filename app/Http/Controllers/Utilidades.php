@@ -29,9 +29,7 @@ class Utilidades extends Controller
 	 *  shopifyVerifyWebhook();
 	 *  shopifyGraphQL();
 	 *  shopifyRESTAPI();
-	 */
-
-	/* @emelero - 16.11.2019 */
+	*/
 	public static function shopifyStoreSel($sfy_store_code)
 	{
 		// Una pequeña ayuda para identificar propiedades de tiendas. Ampliable.
@@ -155,7 +153,6 @@ class Utilidades extends Controller
 		return ($hmac_header == $calculated_hmac);
 	}
 
-	/* @emelero - 16.11.2019 */
 	public static function shopifyGraphQL($shopifyStoreSel, $graphQLquery, $graphQLvariables='{ }', $api_ver='2023-07')
 	{
 		// NOTA: Al realizar una petición de tipo application/graphql mediante Guzzle, no es necesario declarar la query
@@ -206,7 +203,6 @@ class Utilidades extends Controller
 		return $response;
 	}
 
-	/* @emelero - 16.11.2019 */
 	public static function shopifyRESTAPI($method='PUT', $endpoint, $shopifyStoreSel, $data, $api_ver='2023-07')
 	{
 
@@ -365,7 +361,6 @@ class Utilidades extends Controller
         return $response;
     }
 
-	/* @emelero - 16.01.2019 */
 	public static function shopifyBulkOperation($shopifyStoreSel, $query)
 	{
 
@@ -440,6 +435,8 @@ class Utilidades extends Controller
 	// WIP - Método para añadir métricas a los clientes mediante la Track API de Klaviyo
 	public static function klaviyoTrackApi($shopifyStoreSel, $event_name, $cust_properties, $properties)
 	{
+
+		Log::debug("klaviyoTrackApi");
 		$ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://a.klaviyo.com/api/track', 'verify' => false]);
 
 		$body = '{
@@ -460,63 +457,102 @@ class Utilidades extends Controller
 		}
 
 		return json_decode($request->getBody(), true);
+
+		// $ly_client = new \GuzzleHttp\Client(['verify' => false]);		
+		// try {
+		// 	$response = $ly_client->request('POST', 'https://a.klaviyo.com/api/events/', [
+		// 		'body' => '{"data":{"type":"event","attributes":{"properties":' . $properties . ',"time":' . date_timestamp_get(date_create()) . ',"metric":{"data":{"type":"metric","attributes":{"name":' . $event_name . '}}},"profile":{"data":{"type":"profile","attributes":{"email":' . $cust_properties . '},"id":' . $shopifyStoreSel["key"] . '}}}}}',
+		// 		'headers' => [
+		// 		  'Authorization' => 'Klaviyo-API-Key ' . $shopifyStoreSel["klyPublicKey"],
+		// 		  'accept' => 'application/json',
+		// 		  'content-type' => 'application/json',
+		// 		  'revision' => '2024-05-15',
+		// 		],
+		// 	  ]);
+		// 	} catch (\GuzzleHttp\Exception\ClientException $e) {
+		// 		$error = $e->getResponse()->getBody();
+		// 		Log::debug("Something went wrong: " . $e->getMessage() . " at " . $e->getFile() . " : line(" . $e->getLine() . ")");
+		// 		exit($error);
+		// 	}
+	
+		// 	return json_decode($request->getBody(), true);
 	}
 
 	// WIP - Método para añadir propiedades a los clientes mediante la Identify API de Klaviyo
 	public static function klaviyoIdentifyApi($shopifyStoreSel, $properties)
 	{
-		Log::debug("pasa por aquí11");
-		$ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://a.klaviyo.com/api/identify', 'verify' => false]);
-		Log::debug("pasa por aquí22");
-		$body = '{
-			"token" : "' . $shopifyStoreSel["klyPublicKey"] . '",
-			"properties" : ' . $properties . '
-		}';
-		
-		$encoded_body = base64_encode($body);
-		
+		Log::debug("klaviyoIdentifyApi");
+		Log::debug($properties);
+
+		$client = new \GuzzleHttp\Client(['verify' => false]);
+		$arrayProperties = json_decode($properties, true);
+
+		$idKlaviyoUser = self::obtenerProfileKlaviyo($arrayProperties['email']);
+
+		if (isset($arrayProperties['first_name']) && isset($arrayProperties['last_name'])) {
+			$body = '{
+				"data": {
+					"type":"profile",
+					"attributes":{
+						"first_name": "' . $arrayProperties['first_name'] . '",
+						"last_name": "' . $arrayProperties['last_name'] . '",
+						"properties": ' . $properties . '
+						},
+						"id": "' . $idKlaviyoUser . '"
+					}
+			}';
+		} else {
+			$body = '{
+				"data": {
+					"type":"profile",
+					"attributes":{
+						"properties": ' . $properties . '
+						},
+						"id": "' . $idKlaviyoUser . '"
+					}
+			}';
+		}
+
 		try {
-			$request = $ly_client->get("?data=$encoded_body");
+			$response = $client->request('POST', 'https://a.klaviyo.com/client/profiles/?company_id=' . $shopifyStoreSel["klyPublicKey"], [
+				'body' => $body,
+				'headers' => [
+				  'accept' => 'application/json',
+				  'content-type' => 'application/json',
+				  'revision' => '2024-07-15',
+				],
+			]);
 		} catch (\GuzzleHttp\Exception\ClientException $e) {
 			$error = $e->getResponse()->getBody();
 			Log::debug("Something went wrong: " . $e->getMessage() . " at " . $e->getFile() . " : line(" . $e->getLine() . ")");
 			exit($error);
 		}
-		Log::debug("pasa por aquí3");
-		/*if (strpos($properties, "Accepts Marketing")) {
-			$client = new \GuzzleHttp\Client(['verify' => false]);
-			$properties = json_decode($properties, true);
-			$mail = $properties['$email'];
-			$response = $client->request('POST', 'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/', [
-			  'body' => '{"data":{"type":"profile-subscription-bulk-create-job","attributes":{"list_id":"YfNW89","custom_source":"Marketing Event","subscriptions":[{"channels":{"email":["MARKETING"]},"email":"' . $mail . '"}],"custom_source":"Marketing Event"}}}',
-			  'headers' => [
-				'Authorization' => 'Klaviyo-API-Key pk_b27b9e1b7718a063e615db59b302d6ea4f',
-				'accept' => 'application/json',
-				'content-type' => 'application/json',
-				'revision' => '2024-05-15',
-			  ],
-			]);
-		}*/
-		Log::debug("pasa por aquí4");
-		return json_decode($request->getBody(), true);
+		Log::debug("termino klaviyoIdenfityApi");
+
+		return json_decode($response->getBody(), true);
 	}
 
 	// Método para añadir a los usuarios que marcan el consent a una lista
 	public static function klaviyoAddProfileToList($mail)
 	{
-		$client = new \GuzzleHttp\Client(['verify' => false]);
 
-		$response = $client->request('GET', 'https://a.klaviyo.com/api/v2/people/search?email=' . $mail . '&api_key=pk_b27b9e1b7718a063e615db59b302d6ea4f', [
-		  'headers' => [
-			'accept' => 'application/json',
-		  ],
-		]);
+		$apiKey = env('KLY_ES_PRIVATE_API_KEY');
 
+		$client = new Client();
+		$headers = [
+		  'Authorization' => 'Klaviyo-API-Key ' . $apiKey,
+		  'accept' => 'application/json',
+		  'content-type' => 'application/json',
+		  'revision' => '2024-05-15'
+		];
+		$request = new Request('GET', 'https://a.klaviyo.com/api/profiles?filter=equals(email,"' . $mail . '")', $headers);
+		$response = $client->sendAsync($request)->wait();
+		
 		$idKlaviyoUser = json_decode($response->getBody(), true);
 		$idKlaviyoUser = $idKlaviyoUser['id'];
 
 		$curl = curl_init();
-Log::debug("klaviyoAddProfileToList pasa por aquí1");
+		Log::debug("klaviyoAddProfileToList pasa por aquí1");
 		curl_setopt_array($curl, array(
 		  CURLOPT_URL => 'https://a.klaviyo.com/api/lists/YfNW89/relationships/profiles/',
 		  CURLOPT_RETURNTRANSFER => true,
@@ -528,17 +564,53 @@ Log::debug("klaviyoAddProfileToList pasa por aquí1");
 		  CURLOPT_CUSTOMREQUEST => 'POST',
 		  CURLOPT_POSTFIELDS =>'{"data":[{"type":"profile","id":"' . $idKlaviyoUser . '"}]}',
 		  CURLOPT_HTTPHEADER => array(
-			'Authorization: Klaviyo-API-Key pk_b27b9e1b7718a063e615db59b302d6ea4f',
+			'Authorization: Klaviyo-API-Key ' . $apiKey,
 			'revision: 2023-02-22',
 			'Content-Type: application/json',
 			'Accept: application/json'
 		  ),
 		));
-Log::debug("klaviyoAddProfileToList pasa por aquí2");
+		Log::debug("klaviyoAddProfileToList pasa por aquí2");
 		$response = curl_exec($curl);
-Log::debug("klaviyoAddProfileToList pasa por aquí3");
+		Log::debug("klaviyoAddProfileToList pasa por aquí3");
 		curl_close($curl);
 		echo $response;
+	}
+
+	/**
+	 * Función para obtener el perfil de klaviyo.
+	 *
+	 * @author rpalos
+	 * 07-2024
+	 * 
+	*/
+	public static function obtenerProfileKlaviyo($email) {
+		try {
+			Log::debug("obtenerProfileKlaviyo");
+			$client = new \GuzzleHttp\Client(['verify' => false]);
+	
+			$response = $client->request('GET', 'https://a.klaviyo.com/api/profiles?filter=equals(email,"' . $email . '")', [
+				'headers' => [
+				  'Authorization' => 'Klaviyo-API-Key ' . env('KLY_ES_PRIVATE_API_KEY'),
+				  'accept' => 'application/json',
+				  'revision' => '2024-05-15',
+				],
+			]);
+			
+			$idKlaviyoUser = json_decode($response->getBody(), true);
+	
+			if (isset($idKlaviyoUser['data'][0])) {
+				$idKlaviyoUser = $idKlaviyoUser['data'][0]['id'];
+			} else {
+				$idKlaviyoUser = $idKlaviyoUser['data']['id'];
+			}
+	
+			return $idKlaviyoUser;
+		} catch (\Exception $e) {
+			$error = $e->getResponse()->getBody();
+			Log::error("Something went wrong: " . $e->getMessage() . " at " . $e->getFile() . " : line(" . $e->getLine() . ")");
+			exit($error);
+		}
 	}
 
 	/*   _    _____   ___   _  _______   ___    ___ ___  _  _
@@ -556,14 +628,20 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
 	public static function getLoyaltyCustomer($lty_user_email, $lty_api_key, $lty_api_pwd)
 	{
 
-		// Creamos nuevo cliente Guzzle con la URI base de la API de Loyaltylion
-		$ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.loyaltylion.com/']);
-
-		// Petición GET a través de Guzzle.
-		$request = $ly_client->get("v2/customers?email=$lty_user_email", [
-			'auth' => [ $lty_api_key, $lty_api_pwd ],
-			'headers' => [ 'Accept' => 'application/json' ]
-		]);
+		try {
+			// Creamos nuevo cliente Guzzle con la URI base de la API de Loyaltylion
+			$ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.loyaltylion.com/']);
+	
+			// Petición GET a través de Guzzle.
+			$request = $ly_client->get("v2/customers?email=$lty_user_email", [
+				'auth' => [ $lty_api_key, $lty_api_pwd ],
+				'headers' => [ 'Accept' => 'application/json', 'Content-Type' => 'application/json' ]
+			]);
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			$error = $e->getResponse()->getBody();
+			Log::debug("Something went wrong: " . $e->getMessage() . " at " . $e->getFile() . " : line(" . $e->getLine() . ")");
+			exit($error);
+		}
 
 		// Decodificamos la respuesta
 		$response = json_decode($request->getBody(), true);
@@ -575,7 +653,6 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
 	/* @emelero - 15.11.2019 */
 	public static function giveLoyaltyPoints($merchant_id, $lty_points, $reason, $lty_api_key, $lty_api_pwd)
 	{
-
 		// Creamos nuevo cliente Guzzle con la URI base de la API de Loyaltylion
 		$ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.loyaltylion.com/']);
 
@@ -592,7 +669,6 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
 	/* @emelero - 07.01.2020 */
 	public static function generateSDKAuthToken($cust_id, $cust_email, $lty_api_pwd)
 	{
-
 		// $current_date = date(DATE_ISO8601);
 		$current_date = date(DATE_ATOM);
 		$token = sha1($cust_id . $current_date . $cust_email . $lty_api_pwd);
@@ -704,15 +780,15 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
 	 *  |___/___|\___/|_|_\
      *
      *  getSEURExpeditionInfo();
-	 */
-
+	 *
+	 *
 	 /* @emelero - 13.02.2019 */
 	public static function getSEURExpeditionInfo($id='') {
 
-		if (!isset($id)) {
+		if (!isset($id) || empty($id)) {
 		   exit("Tracking code missing");
 	   }
-
+	   
 	   // Creamos cliente SOAP con el WS de consulta de expediciones
 	   $client = new SoapClient("https://ws.seur.com/webseur/services/WSConsultaExpediciones?wsdl", [ 'cache_wsdl' => WSDL_CACHE_NONE, 'trace' => true, 'exception' => true, 'encoding' => 'UTF-8', 'soap_version' => SOAP_1_1 ]);
 	   $parametros = array('in0'=>'L', 'in1'=>'', 'in2'=>'', 'in3'=>$id, 'in4'=>'', 'in5'=>'', 'in6'=>'', 'in7'=>'', 'in8'=>'', 'in9'=>'', 'in10'=>'', 'in11'=>0, 'in12'=>env("SEUR_ES_USER"), 'in13'=>env("SEUR_ES_PWD"), 'in14'=>'S');
@@ -733,19 +809,17 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
      *  /_/ \_\_|   |_| |___|_|_\|___/_||_|___|_|
      *
      *  getAfterShipExpeditionInfo();
-	 */
-
+	 *
+	 * Función para ver el seguimiento de los pedido con las distintas empresas de transporte mediante aftership
 	 /* @emelero - 19.05.2019 */
-	 public static function getAftershipExpeditionInfo($id='') {
+	public static function getAftershipExpeditionInfo($id='') {
 
-		if (!isset($id)) {
+		if (!isset($id) || empty($id)) {
 		   exit("Tracking code missing");
 	    }
 
-        // Log::debug("id: " . $id);
-        // Log::debug(strpos($id, 'T1P'));
-
-		if (strpos($id, 'T1P') === 0 && !strpos($id, '-OUT')) {
+		if ((strpos($id, 'T1P') === 0 && !strpos($id, '-OUT')) || (strpos($id, '119') === 0 || strpos($id, '118') === 0)) {
+			// Seur
             $ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.aftership.com/', 'http_errors' => false]);
             $request = $ly_client->get("v4/trackings/spanish-seur-api/$id", [
                 'headers' => [
@@ -754,6 +828,7 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
                 ]
             ]);
         } elseif (strpos($id, 'T1P') === 0 && strpos($id, '-OUT')) {
+			// Webhook
             $ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.aftership.com/', 'http_errors' => false]);
             $request = $ly_client->get("v4/trackings/paack-webhook/$id", [
                 'headers' => [
@@ -762,8 +837,27 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
                 ]
             ]);
         } elseif (strpos($id, '03812F') === 0) {
+			// MRW
 			$ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.aftership.com/', 'http_errors' => false]);
             $request = $ly_client->get("v4/trackings/mrw-spain/$id", [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'aftership-api-key' => '5df8c783-aaac-4c68-b268-aa3317cb4c9b'
+                ]
+            ]);
+		} else if (strpos($id, '3230') === 0){
+			// CorreosExpress
+            $ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.aftership.com/', 'http_errors' => false]);
+            $request = $ly_client->get("v4/trackings/correosexpress/$id", [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'aftership-api-key' => '5df8c783-aaac-4c68-b268-aa3317cb4c9b'
+                ]
+            ]);
+        } else if (strpos($id, '9999') === 0) {
+			// Sending
+            $ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.aftership.com/', 'http_errors' => false]);
+            $request = $ly_client->get("v4/trackings/sending/$id", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'aftership-api-key' => '5df8c783-aaac-4c68-b268-aa3317cb4c9b'
@@ -772,14 +866,8 @@ Log::debug("klaviyoAddProfileToList pasa por aquí3");
 		} else {
 			// Log::debug("pasa por el else->");
 			// Log::debug($id);
-            $ly_client = new \GuzzleHttp\Client(['base_uri' => 'https://api.aftership.com/', 'http_errors' => false]);
-            $request = $ly_client->get("v4/trackings/correosexpress/$id", [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'aftership-api-key' => '5df8c783-aaac-4c68-b268-aa3317cb4c9b'
-                ]
-            ]);
-        }
+			exit("Tracking code missing");
+		}
 
 		$response = json_decode($request->getBody(), true);
 		return $response;
