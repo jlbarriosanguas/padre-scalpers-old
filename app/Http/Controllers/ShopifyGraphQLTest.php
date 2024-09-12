@@ -387,7 +387,7 @@ class ShopifyGraphQLTest extends Controller
 		return $kly_request;
 
 		$properties = [
-			'$email' => 'emelero123@scalperscompany.com',
+			'email' => 'emelero123@scalperscompany.com',
 			'bf_reward' => '1'
 		];
 		$kly_request = UtilidadesTest::klaviyoIdentifyAPITest(Utilidades::shopifyStoreSel('ES'), json_encode($properties));

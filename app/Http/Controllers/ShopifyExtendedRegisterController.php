@@ -58,9 +58,9 @@ class ShopifyExtendedRegisterController extends Controller
 
         // Klaviyo properties
         $properties = [
-            '$email' => $customer['email'],
-            '$first_name' => $customer['first_name'],
-            '$last_name' => $customer['last_name']
+            'email' => $customer['email'],
+            'first_name' => $customer['first_name'],
+            'last_name' => $customer['last_name']
         ];
 
         if (isset($customer['accepts_marketing'])) {
@@ -119,13 +119,13 @@ class ShopifyExtendedRegisterController extends Controller
                         $properties["postal_code"] = $value;
                         break;
                     case "phone_number":
-                        $properties['$phone_number'] = $value;
+                        $properties['phone_number'] = $value;
                         break;
                     case "gender":
                         $properties["gender"] = $value;
                         break;
                     case "country":
-                        $properties['$country'] = $value;
+                        $properties['country'] = $value;
                         break;
                 }
             }
@@ -204,7 +204,7 @@ class ShopifyExtendedRegisterController extends Controller
 
         // Klaviyo properties
         $properties = [
-            '$email' => $sfy_customer_full['customer']['email']
+            'email' => $sfy_customer_full['customer']['email']
         ];
 
         // Base User
@@ -233,7 +233,7 @@ class ShopifyExtendedRegisterController extends Controller
         }
 
         if (isset($customer['phone_number'])) {
-            $properties['$phone_number'] = $customer['phone_number'];
+            $properties['phone_number'] = $customer['phone_number'];
         }
 
         if (isset($customer['gender'])) {

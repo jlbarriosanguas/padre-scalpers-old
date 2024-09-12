@@ -56,9 +56,9 @@ class ShopifyUserControllerTest extends Controller
 
         // Klaviyo properties
         $properties = [
-            '$email' => $customer['email'],
-            '$first_name' => $customer['first_name'],
-            '$last_name' => $customer['last_name']
+            'email' => $customer['email'],
+            'first_name' => $customer['first_name'],
+            'last_name' => $customer['last_name']
         ];
 
 		if (isset($request->all()['fullForm'])) {
@@ -88,13 +88,13 @@ class ShopifyUserControllerTest extends Controller
 								$properties["postal_code"] = $value;
 								break;
 							case "phone_number":
-								$properties['$phone_number'] = $value;
+								$properties['phone_number'] = $value;
 								break;
 							case "gender":
 								$properties["gender"] = $value;
 								break;
 							case "country":
-								$properties['$country'] = $value;
+								$properties['country'] = $value;
 								break;
 						}
 					}
@@ -243,7 +243,7 @@ class ShopifyUserControllerTest extends Controller
 
         // Klaviyo properties
         $properties = [
-            '$email' => $sfy_customer_full['customer']['email']
+            'email' => $sfy_customer_full['customer']['email']
         ];
 
         // Base User
@@ -269,7 +269,7 @@ class ShopifyUserControllerTest extends Controller
         }
 
         if (isset($customer['phone_number'])) {
-            $properties['$phone_number'] = $customer['phone_number'];
+            $properties['phone_number'] = $customer['phone_number'];
         }
 
         if (isset($customer['gender'])) {
