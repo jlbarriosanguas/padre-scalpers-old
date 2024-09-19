@@ -365,6 +365,22 @@ class LoyaltyCustomEventsController extends Controller
 		return response("FORBIDDEN", 302);
 	}
 
+	public function rewardsDonacion(Request $request) {
+		Log::debug("rewardsDonacion");
+		$verified = self::verify_webhook(file_get_contents("php://input"), $_SERVER["HTTP_X_LOYALTYLION_HMAC_SHA256"]);
+		if ($verified) {
+			$apiKey = env('KLY_ES_PRIVATE_API_KEY');
+			$list = 'Uevbii';
+
+			$idKlaviyoUser = Utilidades::obtenerProfileKlaviyo($request['customer_email']);
+			self::addToListKlaviyo($idKlaviyoUser, $list, $apiKey);
+			
+			Log::debug("rewardsDonacion->OK");
+		  return response("OK", 200);
+		}
+		return response("FORBIDDEN", 302);
+	}
+
 	public function verify_webhook($data, $hmac) {
 		$our_hmac = base64_encode(
 		hash_hmac("sha256", $data, env('LTY_API_PWD'), true));
